@@ -1,72 +1,86 @@
 class Employee {
-    constructor(name ,  age,salary , employee){
-        this.name = name ;
-        this.age = age; 
-        this.salary =salary;
-        this.employee = employee;
-
+    constructor(name, age, salary) {
+        if (this.constructor === Employee) {
+            throw new Error("Cannot instantiate abstract class Employee");
+        }
+        this.name = name;
+        this.age = age;
+        this.salary = salary;
     }
-    get Details(){
-        return `Name: ${this.name} Age: ${this.age} Salary: ${this.salary} Empolyee ${this.employee} `;
+
+    getDetails() {
+        throw new Error("Abstract method getDetails must be implemented by subclass");
     }
 }
 
 class Manager extends Employee {
-    constructor( name , age , salary , department){
-        super(name , age, salary , employee)
+    constructor(name, age, salary, department) {
+        super(name, age, salary);
         this.department = department;
     }
-     get ManagerDetails(){
-        return ` ${super.Details()}  Department: ${this.department}`;
-     }
 
-     counductMeetin(){
-        console.log(`${this.name} is Conducting Meetin For the ${this.department} departement`);        
-     }
+    getDetails() {
+        return `Name: ${this.name}, Age: ${this.age}, Salary: ${this.salary}, Department: ${this.department}`;
+    }
+
+    conductMeeting() {
+        return `${this.name} is conducting a meeting in the ${this.department} department.`;
+    }
 }
 
 class Developer extends Employee {
-    constructor(name, age , salary , employee, programmingLanguage){
-        super(name,age, salary , employee)
+    constructor(name, age, salary, programmingLanguage) {
+        super(name, age, salary);
         this.programmingLanguage = programmingLanguage;
     }
-    get developerDetails(){
-        return `${super.Details()}  Programer: ${this.programmingLanguage}`;
+
+    getDetails() {
+        return `Name: ${this.name}, Age: ${this.age}, Salary: ${this.salary}, Programming Language: ${this.programmingLanguage}`;
     }
-    writeCode(){
-        console.log(`${this.name} is developer of the ${this.programmingLanguage} developer`);
-        
+
+    writeCode() {
+        return `${this.name} is writing ${this.programmingLanguage} code.`;
     }
 }
 
-const readline = requrie('redline');
+const readline = require('readline');
 
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
 
-const Employee  = [];
+const employees = [];
 
-function   showMenu(){
-   console.log('\n1 - Add Employee');
-   console.log('2 - list Empolyee');
-   console.log('3- Exit');
-   rl.question('Choose the option ' , (option)=>{
-    switch(option){
-        case '1':
-            addEmployee();
-            break;
-        case '2':
-            listEmployees();
-            break;
-        case '3':
-            rl.close();
-            break;
-        default:
-            console.log("Chooese Option 1,2,3 like that ");                                    
-    }
-   });
+function showMenu() {
+    console.log('\n1. Add Employee');
+    console.log('2. List Employees');
+    console.log('3. Delete Employee');
+    console.log('4. Update Employee Salary');
+    console.log('5. Exit');
+    rl.question('Choose an option: ', (option) => {
+        switch (option) {
+            case '1':
+                addEmployee();
+                break;
+            case '2':
+                listEmployees();
+                break;
+            case '3':
+                deleteEmployee();
+                break;
+            case '4':
+                updateEmployeeSalary();
+                break;
+            case '5':
+                rl.close();
+                break;
+            default:
+                console.log('Invalid option.');
+                showMenu();
+                break;
+        }
+    });
 }
 
 function addEmployee() {
@@ -77,14 +91,14 @@ function addEmployee() {
                     if (type.toLowerCase() === 'manager') {
                         rl.question('Enter department: ', (department) => {
                             const manager = new Manager(name, age, salary, department);
-                            Employee.push(manager);
+                            employees.push(manager);
                             console.log('Manager added.');
                             showMenu();
                         });
                     } else if (type.toLowerCase() === 'developer') {
                         rl.question('Enter programming language: ', (language) => {
                             const developer = new Developer(name, age, salary, language);
-                            Employee.push(developer);
+                            employees.push(developer);
                             console.log('Developer added.');
                             showMenu();
                         });
@@ -98,16 +112,56 @@ function addEmployee() {
     });
 }
 
-function listEmployees(){
-    if(Employee === 0){
-      console.log('No empolyee is found');
-   } else {
-    Employee.forEach((employee, index) => {
-        console.log(`${index + 1}. ${employee.getDetails()}`);
-    });
+function listEmployees() {
+    if (employees.length === 0) {
+        console.log('No employees found.');
+    } else {
+        employees.forEach((employee, index) => {
+            console.log(`${index + 1}. ${employee.getDetails()}`);
+        });
+    }
+    showMenu();
 }
-showMenu();
 
+function deleteEmployee() {
+    if (employees.length === 0) {
+        console.log('No employees found.');
+        showMenu();
+    } else {
+        listEmployees();
+        rl.question('Enter the employee number to delete: ', (number) => {
+            const index = parseInt(number) - 1;
+            if (index >= 0 && index < employees.length) {
+                const removedEmployee = employees.splice(index, 1)[0];
+                console.log(`Employee ${removedEmployee.name} removed.`);
+            } else {
+                console.log('Invalid employee number.');
+            }
+            showMenu();
+        });
+    }
+}
+
+function updateEmployeeSalary() {
+    if (employees.length === 0) {
+        console.log('No employees found.');
+        showMenu();
+    } else {
+        listEmployees();
+        rl.question('Enter the employee number to update salary: ', (number) => {
+            const index = parseInt(number) - 1;
+            if (index >= 0 && index < employees.length) {
+                rl.question('Enter new salary: ', (newSalary) => {
+                    employees[index].salary = newSalary;
+                    console.log(`Employee ${employees[index].name}'s salary updated to ${newSalary}.`);
+                    showMenu();
+                });
+            } else {
+                console.log('Invalid employee number.');
+                showMenu();
+            }
+        });
+    }
 }
 
 showMenu();
